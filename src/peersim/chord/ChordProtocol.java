@@ -9,7 +9,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 import java.math.*;
-
+import java.util.*;
 /**
  * @author Andrea
  * 
@@ -40,6 +40,8 @@ public class ChordProtocol implements EDProtocol {
 
 	private int next = 0;
 
+	private PeriodicStabTimer pst;
+
 	// campo x debug
 	private int currentNode = 0;
 
@@ -58,6 +60,7 @@ public class ChordProtocol implements EDProtocol {
 		lookupMessage[0] = 0;
 		p = new Parameters();
 		p.tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
+		pst = new PeriodicStabTimer();
 	}
 
 	/*
@@ -86,7 +89,7 @@ public class ChordProtocol implements EDProtocol {
 				if (dest.isUp() == false) {
 					do {
 						varSuccList = 0;
-						stabilize(node);
+						pst.addNodeTimer(node);
 						stabilizations++;
 						fixFingers();
 						dest = find_successor(target);
@@ -151,7 +154,8 @@ public class ChordProtocol implements EDProtocol {
 			System.arraycopy(((ChordProtocol) successorList[0]
 					.getProtocol(p.pid)).successorList, 0, successorList, 1,
 					succLSize - 2);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -322,5 +326,32 @@ public class ChordProtocol implements EDProtocol {
 	public void emptyLookupMessage() {
 		index = 0;
 		this.lookupMessage = new int[0];
+	}
+
+	class PeriodicStabTimer{
+		private ArrayList<PeriodicStabilization> listps = new ArrayList<>();
+		private ArrayList<Integer> registeredKeys = new ArrayList<>();
+		private Timer timer = null;
+		public PeriodicStabTimer(){timer = new Timer();}
+		public void addNodeTimer(Node nodo){
+			for(Integer i:registeredKeys){
+				if(i==nodo.getID()){
+					return;
+				}
+			}
+			registeredKeys.append(nodo.getID());
+			PeriodicStabilization ps = new PeriodicStabilization(nodo);
+			listps.append(ps);
+			timer.schedule(ps,600000);//5min
+		}
+	}
+	class PeriodicStabilization extends TimerTask {
+	    private Node nodo;
+	    public PeriodicStabilization(Node nodo){
+	    	this.nodo = nodo;
+	    }
+	    public void run() {
+	        stabilize(this.nodo);
+	    }
 	}
 }
