@@ -90,7 +90,6 @@ public class ChordProtocol implements EDProtocol {
 					do {
 						varSuccList = 0;
 						pst.addNodeTimer(node);
-						stabilizations++;
 						fixFingers();
 						dest = find_successor(target);
 					} while (dest.isUp() == false);
@@ -330,18 +329,18 @@ public class ChordProtocol implements EDProtocol {
 
 	class PeriodicStabTimer{
 		private ArrayList<PeriodicStabilization> listps = new ArrayList<>();
-		private ArrayList<Integer> registeredKeys = new ArrayList<>();
+		private ArrayList<Long> registeredKeys = new ArrayList<>();
 		private Timer timer = null;
 		public PeriodicStabTimer(){timer = new Timer();}
 		public void addNodeTimer(Node nodo){
-			for(Integer i:registeredKeys){
+			for(Long i:registeredKeys){
 				if(i==nodo.getID()){
 					return;
 				}
 			}
-			registeredKeys.append(nodo.getID());
+			registeredKeys.add(nodo.getID());
 			PeriodicStabilization ps = new PeriodicStabilization(nodo);
-			listps.append(ps);
+			listps.add(ps);
 			timer.schedule(ps,600000);//5min
 		}
 	}

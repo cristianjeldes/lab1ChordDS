@@ -1,0 +1,2 @@
+mkdir -p classes
+javac -sourcepath src -classpath `find -L lib/ -name "*.jar" | tr [:space:] :`:"" -d classes `find -L -name "*.java"`
