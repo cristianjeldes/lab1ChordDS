@@ -9,7 +9,7 @@ compile:
 
 doc:
 	mkdir -p doc
-	javadoc -sourcepath src -classpath $(LIB_JARS):$(PEERSIM_JARS) -d doc peersim.chord
+	javadoc -sourcepath src -classpath $(LIB_JARS):$(PEERSIM_JARS) -d doc peersim.pastry
 
 run:
 	java -cp $(LIB_JARS):$(PEERSIM_JARS):classes peersim.Simulator example.cfg

@@ -1,5 +1,5 @@
 ---------------------------------
-Chord for the Peersim Simulator
+Pastry for the Peersim Simulator
 ---------------------------------
 
 The jar files of peersim must be downloaded separately.
@@ -29,17 +29,4 @@ To run the code, invoke:
 To run all the previous command in this order, invoke:
 
   make all
-
-
-----------------------------
-Pablito
-----------------------------
-
-
-# COMPILE CHORD EXAMPLE
-javac -classpath peersim-1.0.5.jar:djep-1.0.0.jar:jep-2.3.0.jar:classes/ -d classes/ src/peersim/chord/*.java
-
-# EXECUTE CHORD EXAMPLE
-java -cp peersim-1.0.5.jar:djep-1.0.0.jar:jep-2.3.0.jar:classes/ peersim.Simulator example.cfg
-
 
