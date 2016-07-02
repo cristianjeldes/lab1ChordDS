@@ -1,16 +1,14 @@
-Es un proyecto de netbeans, para facilitar su revisión y ejecución.
+Es un proyecto de netbeans, para facilitar su revisiÃ³n y ejecuciÃ³n.
 
 Lo que funciona:
 
 INSERT: Funciona probabilisticamente debido a que existe un error el cual no se pudo debugear
 ya que ocurre en la cola del EventDriven y no se especifica desde
-donde salió el evento que produjo el error. Pero funciona.
+donde saliÃ³ el evento que produjo el error. Pero funciona.
 
 
-LookUP: Si bien todo el LookUp esta implementado no funciona como se esperaría
+LookUP: Si bien todo el LookUp esta implementado no funciona como se esperarÃ­a
 y presenta errores que no son posibles de debugear pq ocurren en clases compiladas
 y relacionadas con el EventDriven, por tanto los errores se producen
 en el mensaje que queda en la cola y no es posible saber desde donde fueron producidos
 esos mensajes/eventos.
-
-Porfavor ponnos un 3.4, solo eso pedimos.
