@@ -23,7 +23,7 @@ public class MSPastryCommonConfig {
   public static       int B      = 4;           /*                 default   4*/
   public static       int BASE   = 16;          /*   = 2^B         default  16*/
 
-  public static       int L      = 32;          /*  =BITS/B        default  32*/
+  public static       int L      = 32;          /*  =BITS/B        16 para cada lado*/
 
   public static final boolean DEBUG = true;
 

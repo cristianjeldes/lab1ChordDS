@@ -1,6 +1,10 @@
 package peersim.pastry;
 
 import java.math.BigInteger;
+import java.util.Vector;
+
+import peersim.core.Network;
+import peersim.core.Node;
 
 //__________________________________________________________________________________________________
 /**
@@ -39,6 +43,10 @@ public class LeafSet implements Cloneable {
      */
     private BigInteger[] right = null;
 
+    
+    public Vector <Node> nodesL;
+    public Vector <Node> nodesR;
+    
     /**
      * total size of the leaf set
      */
@@ -85,26 +93,21 @@ public class LeafSet implements Cloneable {
     public LeafSet(BigInteger myNodeId, int size) {
 
         nodeId = myNodeId;
-
-        size = size + (size%2);
         hsize = size/2;
-        this.size = size;
         left = new BigInteger[hsize];
         right = new BigInteger[hsize];
+        nodesL = new Vector<Node>();
+        nodesR = new Vector<Node>();
+        
         for (int i = 0; i < hsize; i++)
          left[i]=right[i]=EMPTY;
     }
 
 
-    //______________________________________________________________________________________________
-    private final boolean eq(BigInteger b1, BigInteger b2) {
-        if (b1==null) return (b2==null);
-        return b1.equals(b2);
-    }
-    private final int cmp(BigInteger b1, BigInteger b2) {
-        if (b1==null) if (b2==null) return 0; else return -1;
-        if (b2==null) return +1; else return Util.put0(b1).compareTo(Util.put0(b2));
-    }
+	public final MSPastryProtocol get(int i) {
+		return ((MSPastryProtocol) (Network.get(i)).getProtocol(3));
+	}
+   
 
     //______________________________________________________________________________________________
     /**
@@ -115,20 +118,23 @@ public class LeafSet implements Cloneable {
      * @param keyToFind long
      * @return int
      */
-    private int indexOf(BigInteger keyToFind) {
-        if (keyToFind==null) return -1;
-        if (cmp(keyToFind,keyToFind) > 0) { //cerca a destra
-            for (int index = 0; (index < hsize); index++) {
-               if (right[index].equals(keyToFind)) return index;
-            }
-            return -1;
-        }
-        //cerca a sinistra
-        for (int index = 0; index < hsize; index++){
-            if (eq(left[index],keyToFind)) return index;
-        }
-        return -1;
-    }
+	private int indexOf(BigInteger keyToFind) {
+		if (keyToFind.compareTo(nodeId) > 0) { //cerca a destra
+			for (int index = 0; (index < hsize); index++) {
+				if (right[index].equals(keyToFind)) 
+					return index;
+			}
+			return -1;
+
+		}else{
+			//cerca a sinistra
+			for (int index = 0; index < hsize; index++){
+				if (left[index].equals(keyToFind)) 
+					return index;
+			}
+			return -1;
+		}
+	}
 
 
     //______________________________________________________________________________________________
@@ -138,23 +144,41 @@ public class LeafSet implements Cloneable {
      * Note: the last element of the array is lost
      */
     private void shift(BigInteger[] v, int pos) {
-        for(int i = hsize-1; i>pos; i--)
+        for(int i = hsize-1; i > pos; i--)
             v[i] = v[i-1];
     }
 
 
 
     //______________________________________________________________________________________________
-    private boolean removeNode(BigInteger b, BigInteger[] v) {
-        int pos = indexOf(b);
-        if (pos==-1) return false;
-        for (int i = pos; i<v.length-1; i++) {
-            v[i] = v[i+1];
-        }
-        v[v.length-1] = EMPTY;
-        return true;
-    }
 
+    
+    public int isInRight(BigInteger b){
+    	
+    	if(b == null)
+    		return -1;
+
+    	for (int index = 0; (index < right.length); index++) {
+    		if (right[index] != null && right[index].equals(b)){ 
+    			return index;
+    		}
+    	}
+    	return -1;
+    }
+    
+    public int isInLeft(BigInteger b){
+    	
+    	if(b == null)
+    		return -1;
+    	
+    	for (int index = left.length - 1; index >=0 ; index--) {
+			if(left[index] != null && left[index].equals(b)){ 
+				return index;
+			}
+    	}
+    	return -1;
+    }
+    
     //______________________________________________________________________________________________
     /**
      * permanently removes the specified NodeId from this Leaf Set.
@@ -162,9 +186,34 @@ public class LeafSet implements Cloneable {
      * @return boolean true is some element is removed, false if the element does not exists
      */
     public boolean removeNodeId(BigInteger b) {
-          if (b==null)return false;
-          if (cmp(b,nodeId)<0) return removeNode(b, left);
-          return removeNode(b, right);
+    	int l = -1;
+    	int r = -1;
+    	boolean ret = false;
+    	
+    	r = this.isInRight(b);
+    	l = this.isInLeft(b);
+    	
+    	if(r != -1){
+    		for (int i = r; i< right.length-1; i++) {
+    			right[i] = right[i+1];
+    		}
+    		right[right.length-1] = EMPTY;
+    		//System.out.println("REMOVIO LEAFNODE RIGHT");
+    		return true;
+    
+    	}
+    	if(l != -1){
+    		for (int i = l; i< left.length-1; i++) {
+    			left[i] = left[i + 1];
+    		}
+    		left[left.length-1] = EMPTY;
+    		//System.out.println("REMOVIO LEAFNODE LEFT");
+    		return true;
+
+    	}
+    	
+    	return false;
+
     }
 
 
@@ -175,12 +224,53 @@ public class LeafSet implements Cloneable {
      * @return int
      */
     private int correctRightPosition(BigInteger n) {
-        for(int i = 0; i<hsize;i++) {
-            if (right[i]==EMPTY) return i;
-            if (eq(right[i],n)) return -1;
-            if (cmp(right[i],n)>0) return i;
-        }
-        return hsize;
+    	
+    	int l=0;
+    	while (l < hsize && (! (right[l] == EMPTY)) ){
+    		if(right[l].equals(n))
+    			return -1;
+    		l++;
+    	}
+    	
+    	// VER CASOS LIMITE
+    	 if (n.compareTo(nodeId) > 0)   {
+    	 
+    		 for(int i = 0; i < hsize ;i++) {
+    	            if (right[i] == EMPTY) 
+    	            	return i;
+    	            if (right[i].equals(n)) 
+    	            	return -1;
+    	            if (right[i].compareTo(n) > 0 && right[i].compareTo(nodeId) > 0) 
+    	            	return i;
+    	            if (right[i].compareTo(n) < 0 && right[i].compareTo(nodeId) < 0) 
+    	            	return i;
+    	        }
+    	        return hsize;
+    	 
+    	 } else {
+    	//	 System.out.println("Right critico: " + RoutingTable.truncateNodeId(n));
+    		 for(int i = 0; i < hsize ;i++) {
+    	            if (right[i] == EMPTY) 
+    	            	return i;
+    	            if (right[i].equals(n)) 
+    	            	return -1;
+    	            if (right[i].compareTo(n) > 0 && right[i].compareTo(nodeId) < 0){
+    	            	
+    	      // 		 System.out.println("Right critico: " + i);
+
+    	            	return i;
+    	            }
+    	          //  if (right[i].compareTo(n) < 0 && right[i].compareTo(nodeId) < 0) 
+    	          //  	return i;
+    	       
+    	            	
+    	        }
+    	        return hsize;
+
+    		 
+    	 }
+        
+        
     }
 
 
@@ -190,38 +280,86 @@ public class LeafSet implements Cloneable {
      * @return int
      */
     private int correctLeftPosition(BigInteger n) {
-        for(int i = 0; i<hsize;i++) {
-            if (left[i]==EMPTY) return i;
-            if (eq(left[i],n)) return -1;
-            if (cmp(left[i],n)<0) return i;
-        }
-        return hsize;
+    	// VER CASOS LIMITE
+    //	 System.out.println("Left position: " + RoutingTable.truncateNodeId(n) + " in " + RoutingTable.truncateNodeId(nodeId));
+    	
+    	int l=0;
+    	while (l < hsize && (! (left[l] == EMPTY))  ){
+    		if(left[l].equals(n))
+    			return -1;
+    		l++;
+    	}
+    	
+    	if (n.compareTo(nodeId) < 0)   {
+
+    		for(int i = 0; i < hsize;i++) {
+    			if (left[i] == EMPTY) 
+    				return i;
+    			if (left[i].equals(n)) 
+    				return -1;
+    			if (left[i].compareTo(n) < 0 && left[i].compareTo(nodeId) < 0) 
+    				return i;
+    			if (left[i].compareTo(n) > 0 && left[i].compareTo(nodeId) > 0) 
+    				return i;
+
+    		}
+    		return hsize;
+    	} else {
+    		
+    	//	 System.out.println("Left critico: " + RoutingTable.truncateNodeId(n) + " in " + RoutingTable.truncateNodeId(nodeId));
+    		 
+    		for(int i = 0; i < hsize;i++) {
+    			if (left[i] == EMPTY) 
+    				return i;
+    			if (left[i].equals(n)) 
+    				return -1;
+    			if (left[i].compareTo(n) < 0 && left[i].compareTo(nodeId) > 0)
+    					return i;
+    		}
+    				return hsize;
+    	}
     }
 
 
 
 
-    //______________________________________________________________________________________________
-    private void pushToRight(BigInteger newNode) {
-       int index =  correctRightPosition(newNode);
-       if (index==-1) return;
-       if (index==hsize) return;
-       shift(right,index);
-       right[index]=newNode;
+    public void pushToRight(BigInteger newNode) {
+       if (newNode.equals(nodeId)) 
+    		return;
+    	
+       int index = correctRightPosition(newNode);
+       if (index== -1) 
+    	   return;
+       if (index == hsize) 
+    	   return;
+       
+       shift(right, index);
+  //     System.out.println("Index Right: " + index);
+       right[index] = newNode;
     }
 
-    private void pushToLeft(BigInteger newNode) {
-       int index =  correctLeftPosition(newNode);
-       if (index==-1) return;
-       if (index==hsize) return;
-       shift(left,index);
-       left[index]=newNode;
+    
+    
+    public void pushToLeft(BigInteger newNode) {
+       if (newNode.equals(nodeId)) 
+    		return;
+       
+       int index = correctLeftPosition(newNode);
+       if (index==-1) 
+    	   return;
+       
+       if (index==hsize) 
+    	   return;
+       
+       shift(left, index);
+//       System.out.println("Index Left: " + index);
+       left[index] = newNode;
     }
 
 
     private int countNonEmpty(BigInteger[]a) {
         int count = 0;
-        for(count = 0; (count<a.length)&&(a[count]!=EMPTY);count++) /*NOOP*/ ;
+        for(count = 0; (count < a.length) && (a[count]!=EMPTY);count++) /*NOOP*/ ;
         return count;
     }
 
@@ -230,24 +368,69 @@ public class LeafSet implements Cloneable {
      * shortcut for  push(new BigInteger(""+newNode));
      * @param newNode long
      */
+    
     public void push(long newNode) {
+    	//System.out.println("NODO PUSH: " + RoutingTable.truncateNodeId(new BigInteger(""+newNode)));
         push(new BigInteger(""+newNode));
     }
+     
 
 
     //______________________________________________________________________________________________
+    private boolean checkCriticInterval(BigInteger node){
+    	//CHECK CLOCKWISE
+    	if(node.compareTo( get(0).nodeId) >= 0 && node.compareTo(get(hsize-1 ).nodeId) <= 0){
+    		//System.out.println("TRUE");
+    		return true;
+    	}
+    	//CHECK COUNTERWISE
+    	if(node.compareTo( get(Network.size()-1).nodeId) <= 0 && node.compareTo(get(Network.size()-1 - hsize).nodeId) >= 0){
+    		//System.out.println("TRUE");    		
+    		return true;
+    	}
+    	return false;
+    }
+    
+    
     /**
      * push into the leafset the specified node, by according the properties specified by the
      * mspastry protocol
      *
      * @param newNode long
      */
+    
     public void push(BigInteger newNode) {
-      if (eq(newNode,nodeId)) return;
-      if (cmp(newNode,nodeId)>0)
-          pushToRight(newNode);
-      else
-          pushToLeft(newNode);
+    	
+    	// VER CASOS LIMITE
+    	//System.out.println("NODO PUSH: " + RoutingTable.truncateNodeId(newNode)  );
+    	if ( !newNode.equals(this.nodeId)){ 
+
+    		//System.out.println("TO INSERT: "+ RoutingTable.truncateNodeId(newNode));
+    		//System.out.println("ANTES:   "+ this.toString());
+    		//SI ESTA EN INTERVALO CRITICO 
+    		if(checkCriticInterval(newNode)){
+    			//System.out.println("ESTA EN INTERVALO CRITICO");
+    			//RIGHT PROBLEMAAAA
+    			if((newNode.compareTo(this.nodeId) > 0 &&  newNode.compareTo(get(Network.size()-1).nodeId) < 0) 
+    					|| (newNode.compareTo(this.nodeId) < 0 && newNode.compareTo(get(hsize-1).nodeId) < 0)){
+    				//System.out.println("RIGHT");
+    				pushToRight(newNode);
+    		}
+    			else{
+    				//System.out.println("LEFT");
+    				pushToLeft(newNode);
+    		}
+
+    		}else{ //SE APLICA EVALUACION TRADICIONAL
+    			if (newNode.compareTo(nodeId) > 0 )
+    				pushToRight(newNode);
+
+    			if (newNode.compareTo(nodeId) < 0 )
+    				pushToLeft(newNode);
+    		}
+
+    		//System.out.println("DESPUES: "+ this.toString());
+    	}
     }
 
     //______________________________________________________________________________________________
@@ -267,7 +450,9 @@ public class LeafSet implements Cloneable {
      * @return BigInteger
      */
     private BigInteger min() {
-        if (countNonEmpty(left)==0) return nodeId;
+        if (countNonEmpty(left) == 0) 
+        	return nodeId;
+
         return left[countNonEmpty(left)-1];
     }
 
@@ -276,7 +461,8 @@ public class LeafSet implements Cloneable {
      * @return BigInteger
      */
     private BigInteger max() {
-        if (countNonEmpty(right)==0) return nodeId;
+        if (countNonEmpty(right)==0) 
+        	return nodeId;
         return right[countNonEmpty(right)-1];
     }
 
@@ -290,11 +476,39 @@ public class LeafSet implements Cloneable {
      * @return boolean
      */
     public boolean encompass(BigInteger k) {
+    	boolean ret = false;
+    	if(BigInteger.ZERO.compareTo(min()) < 0 && BigInteger.ZERO.compareTo(max())< 0 ){
+    		if(k.compareTo(min()) < 0 && k.compareTo(max())< 0)
+    			ret = true;
+    		if(k.compareTo(min()) > 0 && k.compareTo(max())< 0)
+    			ret =  true;
+    	}
+    		
+        if (min().compareTo(k)  > 0 || max().compareTo(k)  < 0) 
+        	ret = false;
 
-        if (min().compareTo(k)  > 0) return false;
-        if (max().compareTo(k)  < 0) return false;
-
-        return true;
+        return ret;
+    }
+    
+    
+    public boolean needRepairLeft(){
+    	
+    	for(int i = 0 ; i < this.hsize ; i++) {
+    		if(left[i] == EMPTY){
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    public boolean needRepairRight(){
+    	
+    	for(int i = 0 ; i < this.hsize ; i++) {
+    		if(right[i] == EMPTY ){
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 
@@ -314,7 +528,28 @@ public class LeafSet implements Cloneable {
           result[numLeft+i] = right[i];
        return result;
     }
+    
 
+    
+    
+    public void putNodeLeft(Node n){
+    	nodesL.add(n);	
+    }
+
+    
+    public void putNodeRight(Node n){
+    	nodesR.add(n);
+    }
+    
+    
+    public Object[] getAllNodesLeft(){
+    	return nodesL.toArray();
+    }
+    
+    
+    public Object[] getAllNodesRight(){
+    	return nodesR.toArray();
+    }
 
     //______________________________________________________________________________________________
     /**
@@ -328,6 +563,9 @@ public class LeafSet implements Cloneable {
         dolly.hsize = this.hsize;
         dolly.left = this.left.clone();
         dolly.right = this.right.clone();
+        dolly.nodesL = new Vector<Node>();
+        dolly.nodesR = new Vector<Node>();
+        
         return dolly;
     }
 
@@ -362,9 +600,10 @@ public class LeafSet implements Cloneable {
     public String toString() {
 
       String l = "[XX]";
-      for(int i = 0; (i<hsize)&&(left[i]!=EMPTY);i++)
-       l = l.replace("XX", RoutingTable.truncateNodeId(left[i])+";XX");
-
+      for(int i = hsize - 1 ; i>= 0 ; i--){
+    	  if (left[i]!=EMPTY)
+            l = l.replace("XX", RoutingTable.truncateNodeId(left[i])+";XX");
+      }
       l = l.replace(";XX","");
       l = l.replace("XX","");
 

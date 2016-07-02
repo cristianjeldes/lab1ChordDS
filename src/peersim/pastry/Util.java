@@ -33,7 +33,7 @@ public class Util {
         String s2 = Util.put0(b2);
 
         int i = 0;
-        for(i = 0; i<s1.length(); i++) {
+        for(i = 0; i < s1.length(); i++) {
           if (s1.charAt(i)!=s2.charAt(i))
               return i;
         }
@@ -50,7 +50,7 @@ public class Util {
      */
     public static final boolean startsWith(BigInteger b, char c) {
        String s1 = put0(b);
-       return (s1.charAt(0)==c);
+       return (s1.charAt(0) == c);
     }
 
     //______________________________________________________________________________________________
@@ -75,7 +75,7 @@ public class Util {
      * @return boolean
      */
     public static final boolean nearer(BigInteger center, BigInteger near, BigInteger far) {
-     return  distance(center,near) .compareTo(  distance(center,far) ) < 0;
+     return  distance(center,near).compareTo(  distance(center,far) ) < 0;
     }
 
 
@@ -123,9 +123,11 @@ public class Util {
      * @return String
      */
     public static final String put0(BigInteger b) {
-        if (b==null) return null;
+        if (b==null) 
+        	return null;
       String s = b.toString(MSPastryCommonConfig.BASE).toLowerCase();
-      while (s.length() < MSPastryCommonConfig.DIGITS ) s = "0" + s;
+      while (s.length() < MSPastryCommonConfig.DIGITS ) 
+    	  s = "0" + s;
       return s;
     }
 
@@ -162,8 +164,8 @@ public class Util {
          case 'D': return 13;
          case 'd': return 13;
          case 'E': return 14;
-         case 'F': return 15;
          case 'e': return 14;
+         case 'F': return 15;
          case 'f': return 15;
          }
          return 0;
@@ -177,10 +179,12 @@ public class Util {
       * @return int 2^i
       */
      public static final int pow2(int i) {
-         if (i<0) return 0;
-         int result = 1;
-         for (int k = 0; k < i; k++)
-             result *= 2;
+         if (i<0) 
+        	 return 0;
+         int result = (int) Math.pow(2, i);
+         //int result = 1;
+         //for (int k = 0; k < i; k++)
+         //    result *= 2;
          return result;
      }
      //_____________________________________________________________________________________________

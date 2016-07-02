@@ -102,6 +102,11 @@ public class Message {
      * Internal Message: polling cleaner
      */
     public static final int MSG_SERVICEPOLL   = 5;
+    
+    public static final int MSG_INSERT        = 6;
+    
+    public static final int MSG_RESULT        = 7;
+    public static final int MSG_LOOKUP_DFS    = 8;
 
     /**
      * Identify the type of this message
@@ -126,6 +131,8 @@ public class Message {
      */
     public BigInteger dest;
 
+    public BigInteger key;
+    public String[] value;
     /**
      * Source address of the message: has to be filled ad application level
      */
@@ -197,6 +204,9 @@ public class Message {
         return new Message(MSG_JOINREQUEST, body);
     }
 
+    public static final Message makeInsert(Object body) {
+        return new Message(MSG_INSERT, body);
+    }
     //______________________________________________________________________________________________
     /**
      * Encapsulates the creation of a join request
@@ -206,7 +216,10 @@ public class Message {
     public static final Message makeLookUp(Object body) {
         return new Message(MSG_LOOKUP, body);
     }
-
+    
+    public static final Message makeResult(Object body) {
+        return new Message(MSG_RESULT, body);
+    }
     //______________________________________________________________________________________________
     /**
      * returns a ";" separated list of the tracks vector
@@ -266,6 +279,9 @@ public class Message {
        case MSG_LSPROBEREQUEST: return "MSG_LSPROBEREQUEST";
        case MSG_LSPROBEREPLY: return "MSG_LSPROBEREPLY";
        case MSG_SERVICEPOLL: return "MSG_SERVICEPOLL";
+       case MSG_RESULT: return "MSG_RESULT";
+       case MSG_INSERT: return "MSG_INSERT";
+       case MSG_LOOKUP_DFS: return "MSG_LOOKUP_DFS";
        default : return ""+messageType;
        }
    }

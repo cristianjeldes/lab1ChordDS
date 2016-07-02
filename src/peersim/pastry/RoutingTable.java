@@ -36,14 +36,12 @@ public class RoutingTable implements Cloneable{
 
     //______________________________________________________________________________________________
     public BigInteger get(int rows, int cols) {
-        this.cols = cols;
-        this.rows = rows;
         return table[rows][cols];
     }
 
     //______________________________________________________________________________________________
     public void set(int row, int column, BigInteger value) {
-     table[row][column] = value;
+    	table[row][column] = value;
     }
 
     //______________________________________________________________________________________________
@@ -53,6 +51,7 @@ public class RoutingTable implements Cloneable{
      * @param cols int
      */
     public RoutingTable(int rows, int cols) {
+    //	System.out.println("PEERSIM?LOCO");
       this.rows = rows;
       this.cols = cols;
       table = new BigInteger[rows][cols];
@@ -96,7 +95,7 @@ public class RoutingTable implements Cloneable{
 
     //______________________________________________________________________________________________
     public void copyRowFrom(RoutingTable otherRT , int i) {
-
+    	//System.out.println(" COPY ROWWWW"); 
          for (int col = 0; col<cols;col++) {
              this.table[i][col] = otherRT.table[i][col];
          }
@@ -112,10 +111,13 @@ public class RoutingTable implements Cloneable{
      * the node is not in the table. in both cases the node is removed from the table.
      */
     public boolean  removeNodeId(BigInteger b) {
-        if (b==null)return false;
+    	//System.out.println(" REMOVEEEE"); 
+        if (b==null)
+        	return false;
         for (int i = 0; i < this.rows; i++)
             for (int j = 0; j < this.cols; j++) {
-                if (b.equals(table[i][j])) table[i][j] = null;
+                if (b.equals(table[i][j])) 
+                	table[i][j] = null;
                 return true;
             }
        return false;

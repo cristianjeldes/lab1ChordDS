@@ -1,5 +1,6 @@
 package peersim.pastry;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import peersim.config.*;
@@ -158,7 +159,8 @@ public class Turbulence implements Control {
     }
 
     //______________________________________________________________________________________________
-    public void sortNet() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public void sortNet() {
         Network.sort(new Comparator() {
             //______________________________________________________________________________________
             public int compare(Object o1, Object o2) {
@@ -188,8 +190,7 @@ public class Turbulence implements Control {
 
 
        Network.get(randomIndex).setFailState(Node.DOWN);
-
-
+      // System.out.println("NODO REMOVED: " + RoutingTable.truncateNodeId( ((MSPastryProtocol)Network.get(randomIndex).getProtocol(3)).nodeId));
     }
 
 
@@ -244,6 +245,7 @@ public class Turbulence implements Control {
        UniformRandomGenerator urg = new UniformRandomGenerator(MSPastryCommonConfig.BITS, CommonState.r);
        MSPastryProtocol newNode = get(index);
        newNode.setNodeId(urg.generate());
+       //System.out.println("ADDING: "+ RoutingTable.truncateNodeId(newNode.nodeId));
 
        sortNet();
 
@@ -272,29 +274,32 @@ public class Turbulence implements Control {
 
     //______________________________________________________________________________________________
     public boolean execute() {
-        o("..... EXECUTING NODE INITIALIZER");
+      //  o("..... EXECUTING NODE INITIALIZER");
 
         double dice =  CommonState.r.nextDouble();
-        if (dice < p_idle) return false;
+        if (dice < p_idle) 
+        	return false;
 
 
         int sz = Network.size();
         for(int i = 0; i<Network.size();i++)
-            if (!Network.get(i).isUp()) sz--;
+            if (!Network.get(i).isUp()) 
+            	sz--;
 
         dice =  CommonState.r.nextDouble();
 
          // ADDING ONE NODE
         if (dice < p_add) {
             if (sz>=maxsize) return false;
-            o("................................ >> ADDING 1");
+           // o("................................ >> ADDING 1");
             return add();
         }
 
         // REMOVING ONE NODE
         if (sz<=minsize) return false;
-        o("................................ >> REMOVING 1");
+       // o("................................ >> REMOVING 1");
         return rem();
+        //return false;
     }
 
     //______________________________________________________________________________________________

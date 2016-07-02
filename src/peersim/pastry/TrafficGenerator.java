@@ -73,8 +73,22 @@ public class TrafficGenerator implements Control {
         Node start;
         do {
           start = Network.get(CommonState.r.nextInt(Network.size()));
+          
         }  while (( start==null)||(!start.isUp())) ;
-        EDSimulator.add(0, generateLookupMessage(), start, pid);
+        Message m = generateLookupMessage();
+        m.src = ((MSPastryProtocol)start.getProtocol(3)).nodeId;
+        EDSimulator.add(0, m , start, pid);
+        
+        
+        
+        //FOR DEBUG PRINT LEAFSETS AFTER SIMULATION
+        if(CommonState.getTime() == CommonState.getEndTime()-1000){
+        	for(int i = 0; i < Network.size() ; i++){
+        		if(Network.get(i).isUp())
+        			System.out.println( ((MSPastryProtocol)Network.get(i).getProtocol(3)).leafSet.toString());
+        	}
+        	
+        } 
 
         return false;
     }

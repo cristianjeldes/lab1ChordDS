@@ -1,0 +1,74 @@
+Algunas lineas claves:
+
+LOADBALANCER:
+		
+		this.tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
+		this.routeLayer = ((MSPastryProtocol) CommonState.getNode().getProtocol(tid));
+		this.routeLayer.setMyApp(this);
+
+	 	/** To Send a PHTMessage to the DHT**/
+		  public void sendtoDHT(Query q){
+			routeLayer.sendDHTLookup(q.key, q);
+
+		}
+
+PASTRY:
+ private LoadBalancer listener;
+
+ public void setListener(LoadBalancer l) {
+    	listener = l;
+    }
+
+
+RECIVE Y SE LA PASA A LA CAPA DE ARRIBA
+ private void deliver(Message m, boolean replica) {
+        		
+        ((Query)m.body).copyPath(m.tracks.clone());
+        ((Query)m.body).copyHops(m.nrHops);
+        ((Query)m.body).copyTimestamp(m.timestamp);
+
+        if (listener != null)
+            listener.receive(m.body, replica);
+    }
+
+/* PONE EL MSG EN COLA SIMULADOR
+public void send(BigInteger recipient, Object data) {
+    	Message m = new Message(data);
+    	m.dest = recipient;
+    	m.src = this.nodeId;
+    	m.key = ((Query) data).key;
+    	m.value = ((Query) data).value;
+    	m.timestamp = CommonState.getTime();
+
+    	Node me = nodeIdtoNode(this.nodeId);
+    	EDSimulator.add(0, m, me, mspastryid);
+    }
+
+    /* ENVIA DIRECTO POR CAPA DE TRANSPORTE
+public void sendDirect(BigInteger d,  Object data) {
+		
+		Message m = Message.makeLookUp(data);
+		m.dest = d;//((MSPastryProtocol)n.getProtocol(mspastryid)).nodeId;
+		m.src = this.nodeId;
+		m.key = ((Query) data).key;
+	  	m.value = ((Query) data).value;
+		m.timestamp = CommonState.getTime();
+
+		transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
+		transport.send(nodeIdtoNode(this.nodeId) ,nodeIdtoNode(d), m, mspastryid);
+	}
+
+
+public void sendDHTLookup(BigInteger recipient, Object data) {
+		this.send(recipient, data);
+
+}
+
+
+
+
+Dr. Nicolás Hidalgo.
+Assistant Professor
+Informatics Engineering Department
+Universidad de Santiago
+Chile.

@@ -1,32 +1,16 @@
----------------------------------
-Pastry for the Peersim Simulator
----------------------------------
+Es un proyecto de netbeans, para facilitar su revisión y ejecución.
 
-The jar files of peersim must be downloaded separately.
-An example exmaple.cfg configuration file can be found in the 
-main directory.
+Lo que funciona:
 
----------------------------------
-Makefile
----------------------------------
+INSERT: Funciona probabilisticamente debido a que existe un error el cual no se pudo debugear
+ya que ocurre en la cola del EventDriven y no se especifica desde
+donde salió el evento que produjo el error. Pero funciona.
 
-To run the Makefile, modify the PEERSIM_JARS variable to point to 
-your peersim installation, or copy the peersim jar files to the lib
-directory. 
 
-To compile the sources, invoke:
+LookUP: Si bien todo el LookUp esta implementado no funciona como se esperaría
+y presenta errores que no son posibles de debugear pq ocurren en clases compiladas
+y relacionadas con el EventDriven, por tanto los errores se producen
+en el mensaje que queda en la cola y no es posible saber desde donde fueron producidos
+esos mensajes/eventos.
 
-  make
-
-To compile the API documentation, invoke:
-
-  make doc
-
-To run the code, invoke:
-
-  make run
-
-To run all the previous command in this order, invoke:
-
-  make all
-
+Porfavor ponnos un 3.4, solo eso pedimos.
